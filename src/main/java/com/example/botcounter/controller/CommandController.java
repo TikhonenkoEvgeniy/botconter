@@ -40,7 +40,7 @@ public class CommandController {
     }
 
     public SendMessage sendGoodbye(Update update) {
-        journalService.deleteByUserId(update.getMessage().getFrom().getId());
+        //journalService.deleteByUserId(update.getMessage().getFrom().getId()); //todo пофиксит удаление из БД
         userService.deleteUser(update.getMessage().getFrom().getId());
         return new SendMessage(update.getMessage().getChatId().toString(),
                 "Бот остановлен, все данные из БД удалены!");
@@ -50,6 +50,7 @@ public class CommandController {
         Message message = update.getMessage();
         String command = message.getText().split(" ")[0];
         String param = message.getText().replaceAll(command, "").trim();
+
         double limitPerDay;
         if (param.equals("")) {
             limitPerDay = userService.getUserLimitPerDayById(update.getMessage().getFrom().getId());
@@ -63,6 +64,12 @@ public class CommandController {
                         "Ошибка: Лимит на день не может быть меньше 0");
             } else {
                 userService.setUserLimitPerDayById(update.getMessage().getChatId(), limitPerDay);
+                if (journalService.isExistByUserId(update.getMessage().getFrom().getId())) {
+                    return new SendMessage(message.getChatId().toString(),
+                            "Установренный дневной лимит = " + limitPerDay + "\n" +
+                            "Поскольку сегодня уже были затраты, то новый лимит\n" +
+                            "вступит в действие со следующего дня.");
+                }
                 return new SendMessage(message.getChatId().toString(),
                         "Установренный дневной лимит = " + limitPerDay);
             }
