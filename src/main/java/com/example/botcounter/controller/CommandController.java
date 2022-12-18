@@ -21,7 +21,6 @@ public class CommandController {
     }
 
     public SendMessage sendGreeting(Update update) {
-        String s = journalService.getLastDateByUserId(update.getMessage().getFrom().getId());
         Double defaultLimit = 300D;
         Long userId = update.getMessage().getFrom().getId();
         String chatId = update.getMessage().getChatId().toString();
@@ -41,7 +40,7 @@ public class CommandController {
     }
 
     public SendMessage sendGoodbye(Update update) {
-        //journalService.deleteByUserId(update.getMessage().getFrom().getId()); //todo пофиксит удаление из БД
+        journalService.deleteByUserId(update.getMessage().getFrom().getId());
         userService.deleteUser(update.getMessage().getFrom().getId());
         return new SendMessage(update.getMessage().getChatId().toString(),
                 "Бот остановлен, все данные из БД удалены!");
@@ -51,7 +50,6 @@ public class CommandController {
         Message message = update.getMessage();
         String command = message.getText().split(" ")[0];
         String param = message.getText().replaceAll(command, "").trim();
-
         double limitPerDay;
         if (param.equals("")) {
             limitPerDay = userService.getUserLimitPerDayById(update.getMessage().getFrom().getId());
