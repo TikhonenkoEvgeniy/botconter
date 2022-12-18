@@ -15,7 +15,7 @@ public class JournalService {
     }
 
     public void deleteByUserId(Long userId) {
-        journalRepo.deleteAllByUserId(userId);
+        journalRepo.removeAllByUserId(userId);
     }
 
     public boolean isExistByUserId(Long userId) {
@@ -43,5 +43,9 @@ public class JournalService {
 
     public int countAllByUserId(Long userId) {
         return journalRepo.countAllByUserId(userId);
+    }
+
+    public String getLastDateByUserId(Long userId) {
+        return journalRepo.findFirstByUserIdOrderByDateDesc(userId).getDate();
     }
 }

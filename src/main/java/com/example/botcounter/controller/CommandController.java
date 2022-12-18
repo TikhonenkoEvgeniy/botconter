@@ -21,6 +21,7 @@ public class CommandController {
     }
 
     public SendMessage sendGreeting(Update update) {
+        String s = journalService.getLastDateByUserId(update.getMessage().getFrom().getId());
         Double defaultLimit = 300D;
         Long userId = update.getMessage().getFrom().getId();
         String chatId = update.getMessage().getChatId().toString();

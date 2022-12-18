@@ -11,8 +11,8 @@ public interface JournalRepo extends JpaRepository<Journal, Long> {
     Journal findByUserIdAndDate(Long userId, String date);
     boolean existsByUserIdAndDate(Long userId, String date);
     int countAllByUserId(Long userId);
-    //@Query(value = "DELETE FROM journals j WHERE j.user_id = :userId", nativeQuery = true)
-    void deleteAllByUserId(Long userId);
+    void removeAllByUserId(Long userId);
+    Journal findFirstByUserIdOrderByDateDesc(Long userId);
     @Query(value = "SELECT SUM(balance) FROM journals j WHERE j.user_id = :userId", nativeQuery = true)
     Long sumBalanceByUserId(@Param("userId") Long userId);
 }
