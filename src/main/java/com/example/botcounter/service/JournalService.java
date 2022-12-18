@@ -15,7 +15,8 @@ public class JournalService {
     }
 
     public void deleteByUserId(Long userId) {
-        journalRepo.removeAllByUserId(userId);
+        // todo не работает удаление
+        //journalRepo.removeAllByUserId(userId);
     }
 
     public boolean isExistByUserId(Long userId) {
@@ -47,5 +48,9 @@ public class JournalService {
 
     public String getLastDateByUserId(Long userId) {
         return journalRepo.findFirstByUserIdOrderByDateDesc(userId).getDate();
+    }
+
+    public void fillAllEmptyDaysBiUserId(Long userId) {
+        // todo сделать заполнение пропущенных дней по текущий
     }
 }
