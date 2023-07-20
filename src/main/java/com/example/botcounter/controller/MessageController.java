@@ -33,10 +33,10 @@ public class MessageController {
                 journalService.saveBalanceOnToday(userId, balance);
                 if (balance < 0) {
                     return new SendMessage(chatId, "Отменена затрата на сумму: " + price * -1 + "\n" +
-                            "Перерасход дневного лимита на: " + balance * -1);
+                            "Перерасход: " + balance * -1);
                 } else if (balance > 0) {
                     return new SendMessage(chatId, "Отменена затрата на сумму: " + price * -1 + "\n" +
-                            "Остаток на сегодня: " + balance);
+                            "Остаток: " + balance);
                 } else {
                     return new SendMessage(chatId, "Отменена затрата на сумму: " + price * -1 + "\n" +
                             "У вас нет остатка на сегодня!");
@@ -46,10 +46,10 @@ public class MessageController {
                     journalService.saveBalanceOnToday(userId, balance);
                     if (balance < 0) {
                         return new SendMessage(chatId, "Внесена новая затрата в размере: " + price + "\n" +
-                                "Перерасход на сегодня: " + balance * -1);
+                                "Перерасход: " + balance * -1);
                     } else if (balance > 0) {
                         return new SendMessage(chatId, "Внесена новая затрата в размере: " + price + "\n" +
-                                "Остаток на сегодня: " + balance);
+                                "Остаток: " + balance);
                     } else {
                         return new SendMessage(chatId, "Внесена новая затрата в размере: " + price + "\n" +
                                 "У вас нет остатка на сегодня!");

@@ -6,6 +6,10 @@ import com.example.botcounter.util.MyCalendar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Set;
+
 @Service
 public class JournalService {
     private final JournalRepo journalRepo;
@@ -28,9 +32,13 @@ public class JournalService {
     }
 
     public void saveBalanceOnToday(Long userId, Double balance) {
+        saveBalanceOnToday(userId, balance, MyCalendar.getCurrentDate());
+    }
+
+    public void saveBalanceOnToday(Long userId, Double balance, String date) {
         Journal journal;
         if (isExistByUserId(userId)) {
-            journal = journalRepo.findByUserIdAndDate(userId, MyCalendar.getCurrentDate());
+            journal = journalRepo.findByUserIdAndDate(userId, date);
             journal.setBalance(balance);
         } else {
             journal = new Journal(userId, MyCalendar.getCurrentDate(), balance);
@@ -50,7 +58,16 @@ public class JournalService {
         return journalRepo.findFirstByUserIdOrderByDateDesc(userId).getDate();
     }
 
-    public void fillAllEmptyDaysBiUserId(Long userId) {
-        // todo сделать заполнение пропущенных дней по текущий
+    public boolean checkLastDateIsToday(Long userId) {
+        return journalRepo.findFirstByUserIdOrderByDateDesc(userId).getDate().equals(MyCalendar.getCurrentDate());
+    }
+
+    public void fillAllEmptyDaysByUserId(Long userId, double limit) {
+        Set<String> allEmptyDates = MyCalendar.getAllDates(getLastDateByUserId(userId));
+        if (!allEmptyDates.isEmpty()) {
+            for (String date : allEmptyDates) {
+                saveBalanceOnToday(userId, limit, date);
+            }
+        }
     }
 }

@@ -27,15 +27,16 @@ public class CommandController {
         User user;
         if (userService.isExist(userId)) {
             user = userService.getUserById(userId);
-            return new SendMessage(chatId, "Данный пользователь уже сохранен в БД!\n" +
-                    "Установренный дневной лимит = " + user.getLimitPerDay());
+            return new SendMessage(chatId, update.getMessage().getFrom().getUserName() +
+                    " уже сохранен в БД!\n" +
+                    "Дневной лимит: " + user.getLimitPerDay());
         } else {
             user = new User(userId, update.getMessage().getFrom().getFirstName(),
                     update.getMessage().getFrom().getLastName(),
                     update.getMessage().getFrom().getUserName(), defaultLimit);
             userService.saveUser(user);
-            return new SendMessage(chatId, "Добро пожаловать! Вы сохренены в БД!\n" +
-                    "Установренный дневной лимит = " + user.getLimitPerDay());
+            return new SendMessage(chatId, "Добро пожаловать! Вы добавлены в БД!\n" +
+                    "Дневной лимит: " + user.getLimitPerDay());
         }
     }
 
@@ -50,11 +51,12 @@ public class CommandController {
         Message message = update.getMessage();
         String command = message.getText().split(" ")[0];
         String param = message.getText().replaceAll(command, "").trim();
+        Long userId = update.getMessage().getFrom().getId();
         double limitPerDay;
         if (param.equals("")) {
-            limitPerDay = userService.getUserLimitPerDayById(update.getMessage().getFrom().getId());
+            limitPerDay = userService.getUserLimitPerDayById(userId);
             return new SendMessage(message.getChatId().toString(),
-                    "Установренный дневной лимит = " + limitPerDay);
+                    "Дневной лимит: " + limitPerDay);
         }
         try {
             limitPerDay = Double.parseDouble(param);
@@ -62,15 +64,18 @@ public class CommandController {
                 return new SendMessage(message.getChatId().toString(),
                         "Ошибка: Лимит на день не может быть меньше 0");
             } else {
+                if (!journalService.checkLastDateIsToday(userId)) {
+                    journalService.fillAllEmptyDaysByUserId(userId, userService.getUserLimitPerDayById(userId));
+                }
                 userService.setUserLimitPerDayById(update.getMessage().getChatId(), limitPerDay);
-                if (journalService.isExistByUserId(update.getMessage().getFrom().getId())) {
+                if (journalService.isExistByUserId(userId)) {
                     return new SendMessage(message.getChatId().toString(),
-                            "Установренный дневной лимит = " + limitPerDay + "\n" +
+                            "Дневной лимит: " + limitPerDay + "\n" +
                             "Поскольку сегодня уже были затраты, то новый лимит\n" +
                             "вступит в действие со следующего дня.");
                 }
                 return new SendMessage(message.getChatId().toString(),
-                        "Установренный дневной лимит = " + limitPerDay);
+                        "Дневной лимит: " + limitPerDay);
             }
         } catch (NumberFormatException exception) {
             return new SendMessage(message.getChatId().toString(),
@@ -89,7 +94,7 @@ public class CommandController {
         }
         if (balance > 0) {
             return new SendMessage(update.getMessage().getChatId().toString(),
-                    "Доступный остаток на сегодня: " + balance);
+                    "Остаток на сегодня: " + balance);
         } else if (balance < 0) {
             return new SendMessage(update.getMessage().getChatId().toString(),
                     "Перерасход на сегодня: " + balance * -1);
@@ -102,6 +107,7 @@ public class CommandController {
     public SendMessage getAllMoney(Update update) {
         Long userId = update.getMessage().getFrom().getId();
         if (!journalService.isExistByUserId(userId)) {
+            journalService.fillAllEmptyDaysByUserId(userId, userService.getUserLimitPerDayById(userId));
             journalService.saveBalanceOnToday(userId, userService.getUserLimitPerDayById(userId));
         }
         Long balance = journalService.getSumBalanceByUserId(userId);
