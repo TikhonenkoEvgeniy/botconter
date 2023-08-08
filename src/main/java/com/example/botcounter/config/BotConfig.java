@@ -11,7 +11,6 @@ import org.springframework.context.annotation.PropertySource;
 public class BotConfig {
     @Value("${telegram.bot.name}")
     String botName;
-
     @Value("${telegram.bot.token}")
     String botToken;
 }
